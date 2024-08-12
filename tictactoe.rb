@@ -1,67 +1,75 @@
-class Tictactoe
+class TicTacToe
 
+  #Initializes required data
   def initialize
-    @board = [" "," "," "," "," "," "," "," "," "]
+    print "Enter a size of a board: "
+    @size = gets.chomp.to_i
+    @board = Array.new(@size){Array.new(@size, " ")}
     @turn = 0
     @win_condition = [
       [0,1,2],[3,4,5],[6,7,8], #rows
       [0,3,6],[1,4,7],[2,5,8], #columns
       [0,4,8],[2,4,6] #diagonals
     ]
-    @playerx_moves = []
-    @playero_moves = []
+    @player_moves = []
   end
 
+  #Displays tictactoe board
   def display_board
-    puts "  #{@board[0]} | #{@board[1]} | #{@board[2]}"
-    puts "  ---------"
-    puts "  #{@board[3]} | #{@board[4]} | #{@board[5]}"
-    puts "  ---------"
-    puts "  #{@board[6]} | #{@board[7]} | #{@board[8]}"
+    separator = "-" * (@size * 4 - 2)
+    @board.each do |row|
+      row.each do |cell|
+        print "#{cell} |"
+      end
+      puts "\n" + separator
+    end
   end
 
-  def user
-    if @turn % 2 == 0
-      print "player_o, Please Choose a place: "
-      player_o = gets.chomp.to_i
-      @playero_moves << player_o - 1
-      if player_o > 0 && player_o < 10 && @board[player_o - 1] == " "
-        @board[player_o - 1] = "O"
-        system "clear"
-        display_board
+  #Takes User input and adds it in board
+  def user_input
+    player = gets.chomp.to_i
+    row = (player - 1) / @size
+    col = (player - 1) % @size
+      if player > 0 && player < @size * @size && @board[row][col] == " "
+        if @turn % 2 == 0
+          @board[row][col] = "O"
+          system "clear"
+          display_board
+        else
+          @board[row][col] = "X"
+          system "clear"
+          display_board
+        end
       else
+        puts @turn 
         puts "Invalid input"
         user
         @turn += 1
       end
-    else
-      print "player_x, Please choose a place: "
-      player_x = gets.chomp.to_i
-      @playerx_moves << player_x - 1
-      if player_x > 0 && player_x < 10 && @board[player_x - 1] == " "
-        @board[player_x - 1] = "X"
-        system "clear"
-        display_board
-      else
-        puts "invalid input"
-        user
-        @turn += 1
-      end
-    end
-    @turn += 1
   end
 
+  #Makes a move
+  def user
+    if @turn % 2 == 0
+      print "player_o, Please Choose a place: "
+      user_input
+    else
+      print "player_x, Please choose a place: "
+      user_input
+    end
+  end
+  
   def playerx_win
     win = false
     @win_condition.each do |condition|
-      if @playerx_moves.join.include?(condition.join)
+      if @playeboard_sizerx_moves.join.include?(condition.join)
         win = true
         break
       end
     end
     win
   end
-
+  
   def playero_win
     win = false
     @win_condition.each do |condition|
@@ -79,6 +87,7 @@ class Tictactoe
 
   def game
     display_board
+    user
     until board_filled?
       user
       if playerx_win
@@ -93,6 +102,7 @@ class Tictactoe
     end
   end
 
+
 end
-ttt = Tictactoe.new
-ttt.game
+  ttt = TicTacToe.new
+  ttt.game
