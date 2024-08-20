@@ -6,22 +6,17 @@ class TicTacToe
     @size = gets.chomp.to_i
     @board = Array.new(@size){Array.new(@size, " ")}
     @turn = 0
-    @win_condition = [
-      [0,1,2],[3,4,5],[6,7,8], #rows
-      [0,3,6],[1,4,7],[2,5,8], #columns
-      [0,4,8],[2,4,6] #diagonals
-    ]
+    @win_conditions = generate_win_conditions
     @player_moves = []
   end
 
   #Displays tictactoe board
   def display_board
-    separator = "-" * (@size * 4 - 2)
-    @board.each do |row|
-      row.each do |cell|
-        print "#{cell} |"
-      end
-      puts "\n" + separator
+    separator = "-" * (@size * 4 - 3)
+    @board.each_with_index do |row, index|
+      print row.join(" | ")
+      puts ""
+      puts separator if index < @size - 1
     end
   end
 
@@ -30,7 +25,7 @@ class TicTacToe
     player = gets.chomp.to_i
     row = (player - 1) / @size
     col = (player - 1) % @size
-      if player > 0 && player < @size * @size && @board[row][col] == " "
+      if player > 0 && player <= @size * @size && @board[row][col] == " "
         if @turn % 2 == 0
           @board[row][col] = "O"
           system "clear"
@@ -41,14 +36,13 @@ class TicTacToe
           display_board
         end
       else
-        puts @turn 
         puts "Invalid input"
         user
         @turn += 1
       end
   end
 
-  #Makes a move
+  #Cycle Users turn
   def user
     if @turn % 2 == 0
       print "player_o, Please Choose a place: "
@@ -57,47 +51,62 @@ class TicTacToe
       print "player_x, Please choose a place: "
       user_input
     end
-  end
-  
-  def playerx_win
-    win = false
-    @win_condition.each do |condition|
-      if @playeboard_sizerx_moves.join.include?(condition.join)
-        win = true
-        break
-      end
-    end
-    win
-  end
-  
-  def playero_win
-    win = false
-    @win_condition.each do |condition|
-      if @playero_moves.join.include?(condition.join)
-        win = true
-        break
-      end
-    end
-    win
+    @turn += 1
   end
 
+  #Generate win conditions according to board size
+  def generate_win_conditions
+    win_conditions = []
+
+    @size.times do |row|
+      win_conditions << (0...@size).map { |col| [row, col] }                    #generate win condition for rows
+    end
+
+    @size.times do |col|
+      win_conditions << (0...@size).map { |row| [row, col] }                    #generate win condition for columns
+    end
+
+    win_conditions << (0...@size).map { |row| [row, row] }                      #generate win condition for diagonals
+
+    win_conditions << (0...@size).map { |row| [row, @size - 1 - row] }
+
+    win_conditions
+  end
+
+  #Check whether player won or nor
+  def check_win(player)
+  
+    @win_conditions.each do |condition|
+      return true if condition.all? { |row, col| @board[row][col] == player }
+    end
+  
+    false
+  end
+
+  #Checks whether board has been filled or not
   def board_filled?
-    @board.none? {|cell| cell == " "}
+    @board.each do |row|
+      row.each do |cell|
+        return false if cell == " " || cell == nil
+      end
+    end
+    true
   end
 
+  #Executes game
   def game
     display_board
-    user
     until board_filled?
       user
-      if playerx_win
-        puts "Player X wins!"
+      if check_win('X')
+        puts 'X wins'
         break
-      elsif playero_win
-        puts "Player O wins!"
+      elsif check_win('O')
+        puts 'O wins'
         break
       elsif board_filled?
         puts "It's a draw!"
+        break
       end
     end
   end
